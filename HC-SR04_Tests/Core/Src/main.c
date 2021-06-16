@@ -71,6 +71,7 @@ uint32_t Difference = 0;
 uint8_t Is_First_Captured = 0;  // is the first value captured ?
 uint8_t Distance  = 0;
 uint8_t count = 0;
+uint8_t debug_counter = 0;
 
 #define TRIG_PIN GPIO_PIN_8
 #define TRIG_PORT GPIOA
@@ -121,6 +122,7 @@ void HCSR04_Read (void)
 	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);  // pull the TRIG pin low
 
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);
+	debug_counter++;
 }
 
 
@@ -168,7 +170,7 @@ int main(void)
     /* USER CODE END WHILE */
 	  HCSR04_Read();
 	  HAL_Delay(200);
-	  count++;
+//	  count++;
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
