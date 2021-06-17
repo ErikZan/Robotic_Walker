@@ -428,7 +428,7 @@ Disassembly of section .text:
 int main(void)
 {
  8000588:	b580      	push	{r7, lr}
- 800058a:	b088      	sub	sp, #32
+ 800058a:	b08a      	sub	sp, #40	; 0x28
  800058c:	af02      	add	r7, sp, #8
   /* USER CODE END 1 */
 
@@ -469,24 +469,24 @@ int main(void)
 	  // Tell TMP102 that we want to read from the temperature register
 	  buf[0] = REG_TEMP;
  80005ac:	2300      	movs	r3, #0
- 80005ae:	713b      	strb	r3, [r7, #4]
+ 80005ae:	703b      	strb	r3, [r7, #0]
 	  ret = HAL_I2C_Master_Transmit(&hi2c1, TMP102_ADDR, buf, 1, HAL_MAX_DELAY);
- 80005b0:	2313      	movs	r3, #19
+ 80005b0:	232a      	movs	r3, #42	; 0x2a
  80005b2:	b299      	uxth	r1, r3
- 80005b4:	1d3a      	adds	r2, r7, #4
+ 80005b4:	463a      	mov	r2, r7
  80005b6:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
  80005ba:	9300      	str	r3, [sp, #0]
  80005bc:	2301      	movs	r3, #1
  80005be:	4838      	ldr	r0, [pc, #224]	; (80006a0 <main+0x118>)
  80005c0:	f000 ff68 	bl	8001494 <HAL_I2C_Master_Transmit>
  80005c4:	4603      	mov	r3, r0
- 80005c6:	75fb      	strb	r3, [r7, #23]
+ 80005c6:	77fb      	strb	r3, [r7, #31]
 	  if ( ret != HAL_OK ) {
- 80005c8:	7dfb      	ldrb	r3, [r7, #23]
+ 80005c8:	7ffb      	ldrb	r3, [r7, #31]
  80005ca:	2b00      	cmp	r3, #0
  80005cc:	d008      	beq.n	80005e0 <main+0x58>
 		strcpy((char*)buf, "Error Tx\r\n");
- 80005ce:	1d3b      	adds	r3, r7, #4
+ 80005ce:	463b      	mov	r3, r7
  80005d0:	4a34      	ldr	r2, [pc, #208]	; (80006a4 <main+0x11c>)
  80005d2:	ca07      	ldmia	r2, {r0, r1, r2}
  80005d4:	c303      	stmia	r3!, {r0, r1}
@@ -500,22 +500,22 @@ int main(void)
 
 		// Read 2 bytes from the temperature register
 		ret = HAL_I2C_Master_Receive(&hi2c1, TMP102_ADDR, buf, 2, HAL_MAX_DELAY);
- 80005e0:	2313      	movs	r3, #19
+ 80005e0:	232a      	movs	r3, #42	; 0x2a
  80005e2:	b299      	uxth	r1, r3
- 80005e4:	1d3a      	adds	r2, r7, #4
+ 80005e4:	463a      	mov	r2, r7
  80005e6:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
  80005ea:	9300      	str	r3, [sp, #0]
  80005ec:	2302      	movs	r3, #2
  80005ee:	482c      	ldr	r0, [pc, #176]	; (80006a0 <main+0x118>)
  80005f0:	f001 f84e 	bl	8001690 <HAL_I2C_Master_Receive>
  80005f4:	4603      	mov	r3, r0
- 80005f6:	75fb      	strb	r3, [r7, #23]
+ 80005f6:	77fb      	strb	r3, [r7, #31]
 		if ( ret != HAL_OK ) {
- 80005f8:	7dfb      	ldrb	r3, [r7, #23]
+ 80005f8:	7ffb      	ldrb	r3, [r7, #31]
  80005fa:	2b00      	cmp	r3, #0
  80005fc:	d008      	beq.n	8000610 <main+0x88>
 		  strcpy((char*)buf, "Error Rx\r\n");
- 80005fe:	1d3b      	adds	r3, r7, #4
+ 80005fe:	463b      	mov	r3, r7
  8000600:	4a29      	ldr	r2, [pc, #164]	; (80006a8 <main+0x120>)
  8000602:	ca07      	ldmia	r2, {r0, r1, r2}
  8000604:	c303      	stmia	r3!, {r0, r1}
@@ -528,36 +528,36 @@ int main(void)
 
 		  //Combine the bytes
 		  val = ((int16_t)buf[0] << 4) | (buf[1] >> 4);
- 8000610:	793b      	ldrb	r3, [r7, #4]
+ 8000610:	783b      	ldrb	r3, [r7, #0]
  8000612:	011b      	lsls	r3, r3, #4
  8000614:	b21a      	sxth	r2, r3
- 8000616:	797b      	ldrb	r3, [r7, #5]
+ 8000616:	787b      	ldrb	r3, [r7, #1]
  8000618:	091b      	lsrs	r3, r3, #4
  800061a:	b2db      	uxtb	r3, r3
  800061c:	b21b      	sxth	r3, r3
  800061e:	4313      	orrs	r3, r2
- 8000620:	82bb      	strh	r3, [r7, #20]
+ 8000620:	83bb      	strh	r3, [r7, #28]
 //		  if ( val > 0x7FF ) {
 //			val |= 0xF000;
 //		  }
 
 		  // Convert to float temperature value (Celsius)
 		  temp_c = val;  //* 0.0625;
- 8000622:	f9b7 3014 	ldrsh.w	r3, [r7, #20]
+ 8000622:	f9b7 301c 	ldrsh.w	r3, [r7, #28]
  8000626:	ee07 3a90 	vmov	s15, r3
  800062a:	eef8 7ae7 	vcvt.f32.s32	s15, s15
- 800062e:	edc7 7a04 	vstr	s15, [r7, #16]
+ 800062e:	edc7 7a06 	vstr	s15, [r7, #24]
 
 		  // Convert temperature to decimal format
 		  temp_c *= 100;
- 8000632:	edd7 7a04 	vldr	s15, [r7, #16]
+ 8000632:	edd7 7a06 	vldr	s15, [r7, #24]
  8000636:	ed9f 7a1d 	vldr	s14, [pc, #116]	; 80006ac <main+0x124>
  800063a:	ee67 7a87 	vmul.f32	s15, s15, s14
- 800063e:	edc7 7a04 	vstr	s15, [r7, #16]
+ 800063e:	edc7 7a06 	vstr	s15, [r7, #24]
 		  sprintf((char*)buf,
 				"%u.%u C\r\n",
 				((unsigned int)temp_c / 100),
- 8000642:	edd7 7a04 	vldr	s15, [r7, #16]
+ 8000642:	edd7 7a06 	vldr	s15, [r7, #24]
  8000646:	eefc 7ae7 	vcvt.u32.f32	s15, s15
  800064a:	ee17 2a90 	vmov	r2, s15
 		  sprintf((char*)buf,
@@ -565,7 +565,7 @@ int main(void)
  8000650:	fba3 2302 	umull	r2, r3, r3, r2
  8000654:	095a      	lsrs	r2, r3, #5
 				((unsigned int)temp_c % 100));
- 8000656:	edd7 7a04 	vldr	s15, [r7, #16]
+ 8000656:	edd7 7a06 	vldr	s15, [r7, #24]
  800065a:	eefc 7ae7 	vcvt.u32.f32	s15, s15
  800065e:	ee17 1a90 	vmov	r1, s15
 		  sprintf((char*)buf,
@@ -575,7 +575,7 @@ int main(void)
  800066a:	2064      	movs	r0, #100	; 0x64
  800066c:	fb00 f303 	mul.w	r3, r0, r3
  8000670:	1acb      	subs	r3, r1, r3
- 8000672:	1d38      	adds	r0, r7, #4
+ 8000672:	4638      	mov	r0, r7
  8000674:	490f      	ldr	r1, [pc, #60]	; (80006b4 <main+0x12c>)
  8000676:	f002 fcf7 	bl	8003068 <siprintf>
 //	  		strcpy((char*)buf, "HAl seems ok\r\n");
@@ -584,12 +584,12 @@ int main(void)
 
 //	  strcpy((char*)buf,"Hello!\r\n");
 	  HAL_UART_Transmit(&huart2, buf, strlen((char*)buf),HAL_MAX_DELAY);
- 800067a:	1d3b      	adds	r3, r7, #4
+ 800067a:	463b      	mov	r3, r7
  800067c:	4618      	mov	r0, r3
  800067e:	f7ff fdaf 	bl	80001e0 <strlen>
  8000682:	4603      	mov	r3, r0
  8000684:	b29a      	uxth	r2, r3
- 8000686:	1d39      	adds	r1, r7, #4
+ 8000686:	4639      	mov	r1, r7
  8000688:	f04f 33ff 	mov.w	r3, #4294967295	; 0xffffffff
  800068c:	480a      	ldr	r0, [pc, #40]	; (80006b8 <main+0x130>)
  800068e:	f002 fa14 	bl	8002aba <HAL_UART_Transmit>

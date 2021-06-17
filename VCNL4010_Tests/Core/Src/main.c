@@ -46,7 +46,7 @@ I2C_HandleTypeDef hi2c1;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-static const TMP102_ADDR = 0x13;
+static const int TMP102_ADDR = 0x2A;
 static const uint8_t REG_TEMP = 0x00;
 int count =0;
 /* USER CODE END PV */
@@ -74,7 +74,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 	HAL_StatusTypeDef ret;
 	int16_t val;
-	uint8_t buf[12];
+	uint8_t buf[24];
 	float temp_c;
 
   /* USER CODE END 1 */

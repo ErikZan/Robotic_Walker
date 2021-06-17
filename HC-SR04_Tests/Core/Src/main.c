@@ -72,6 +72,10 @@ uint8_t Is_First_Captured = 0;  // is the first value captured ?
 uint8_t Distance  = 0;
 uint8_t count = 0;
 uint8_t debug_counter = 0;
+uint8_t debug_Val1 = 0;
+uint8_t debug_Val2 = 0;
+uint8_t Enable_Trigger = 1;
+
 
 #define TRIG_PIN GPIO_PIN_8
 #define TRIG_PORT GPIOA
@@ -81,23 +85,29 @@ uint8_t debug_counter = 0;
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)  // if the interrupt source is channel1
+//	if (htim->State == HAL_TIM_STATE_READY)
 	{
-		if (Is_First_Captured==0) // if the first value is not captured
+		if (Is_First_Captured == 0) // if the first value is not captured
 		{
 			IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1); // read the first value
 			Is_First_Captured = 1;  // set the first captured as true
+
+			debug_Val1++;
+
 			// Now change the polarity to falling edge
 			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
 		}
 
-		else if (Is_First_Captured==1)   // if the first is already captured
+		else if (Is_First_Captured == 1)   // if the first is already captured
 		{
 			IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);  // read second value
 			__HAL_TIM_SetCounter(htim, 0);  // reset the counter
 
+			debug_Val2++;
+
 			if (IC_Val2 > IC_Val1)
 			{
-				Difference = IC_Val2-IC_Val1;
+				Difference = IC_Val2 - IC_Val1;
 			}
 
 			else if (IC_Val1 > IC_Val2)
@@ -111,17 +121,105 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 			// set polarity to rising edge
 			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
 			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC1);
+//			htim1.Channel = HAL_TIM_ACTIVE_CHANNEL_2;
+//			htim1.State = HAL_TIM_STATE_RESET;
+			count++;
 		}
 	}
 }
+void No_Callback (void){
+	if (Is_First_Captured == 0) // if the first value is not captured
+		{
+			IC_Val1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1); // read the first value
+			Is_First_Captured = 1;  // set the first captured as true
 
+			debug_Val1++;
+
+			// Now change the polarity to falling edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+		}
+
+		else if (Is_First_Captured == 1)   // if the first is already captured
+		{
+			IC_Val2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);  // read second value
+			__HAL_TIM_SetCounter(&htim1, 0);  // reset the counter
+
+			debug_Val2++;
+
+			if (IC_Val2 > IC_Val1)
+			{
+				Difference = IC_Val2 - IC_Val1;
+			}
+
+			else if (IC_Val1 > IC_Val2)
+			{
+				Difference = (0xffff - IC_Val1) + IC_Val2;
+			}
+
+			Distance = Difference * .034/2;
+			Is_First_Captured = 0; // set it back to false
+
+			// set polarity to rising edge
+			__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC1);
+		}
+}
 void HCSR04_Read (void)
 {
 	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_SET);  // pull the TRIG pin HIGH
 	delay(10);  // wait for 10 us
-	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);  // pull the TRIG pin low
+	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);   // pull the TRIG pin low
+
+	htim1.Channel = HAL_TIM_ACTIVE_CHANNEL_1;
+	htim1.State = HAL_TIM_STATE_RESET;
+	htim1.State = HAL_TIM_STATE_READY;
 
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);
+
+//	count++;
+
+//	if (Is_First_Captured == 0) // if the first value is not captured
+//			{
+//				IC_Val1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1); // read the first value
+//				Is_First_Captured = 1;  // set the first captured as true
+//
+//				debug_Val1++;
+//
+//				// Now change the polarity to falling edge
+//				__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+//			}
+//
+//			else if (Is_First_Captured == 1)   // if the first is already captured
+//			{
+//				IC_Val2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);  // read second value
+//				__HAL_TIM_SetCounter(&htim1, 0);  // reset the counter
+//
+//				debug_Val2++;
+//
+//				if (IC_Val2 > IC_Val1)
+//				{
+//					Difference = IC_Val2 - IC_Val1;
+//				}
+//
+//				else if (IC_Val1 > IC_Val2)
+//				{
+//					Difference = (0xffff - IC_Val1) + IC_Val2;
+//				}
+//
+//				Distance = Difference * .034/2;
+//				Is_First_Captured = 0; // set it back to false
+//
+//				// set polarity to rising edge
+//				__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+////				__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC1);
+//			}
+
+
+
+
+
+
+
 	debug_counter++;
 }
 
@@ -165,11 +263,60 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
     /* USER CODE END WHILE */
+//	  if (Enable_Trigger == 1) {
+//		HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_SET);  // pull the TRIG pin HIGH
+//		delay(10);  // wait for 10 us
+//		HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);   // pull the TRIG pin low
+//		__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);
+//		Enable_Trigger = 0;
+//	  }
+//
+//	  if (Is_First_Captured == 0) // if the first value is not captured
+//	  			{
+//	  				IC_Val1 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1); // read the first value
+//	  				Is_First_Captured = 1;  // set the first captured as true
+//
+//	  				debug_Val1++;
+//
+//	  				// Now change the polarity to falling edge
+//	  				__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_FALLING);
+//	  			}
+//
+//	  			else if (Is_First_Captured == 1)   // if the first is already captured
+//	  			{
+//	  				IC_Val2 = HAL_TIM_ReadCapturedValue(&htim1, TIM_CHANNEL_1);  // read second value
+//	  				__HAL_TIM_SetCounter(&htim1, 0);  // reset the counter
+//
+//	  				debug_Val2++;
+//
+//	  				if (IC_Val2 > IC_Val1)
+//	  				{
+//	  					Difference = IC_Val2 - IC_Val1;
+//	  				}
+//
+//	  				else if (IC_Val1 > IC_Val2)
+//	  				{
+//	  					Difference = (0xffff - IC_Val1) + IC_Val2;
+//	  				}
+//
+//	  				Distance = Difference * .034/2;
+//	  				Is_First_Captured = 0; // set it back to false
+//	  				Enable_Trigger = 1;
+//
+//	  				// set polarity to rising edge
+//	  				__HAL_TIM_SET_CAPTUREPOLARITY(&htim1, TIM_CHANNEL_1, TIM_INPUTCHANNELPOLARITY_RISING);
+//	  				__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC1);
+////	  			}
+
+
+
 	  HCSR04_Read();
-	  HAL_Delay(200);
+//	  No_Callback();
+	  HAL_Delay(500);
 //	  count++;
     /* USER CODE BEGIN 3 */
   }
